@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}Xodimlar va Kunlik Chiqimlar{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-zinc-200 dark:border-zinc-800 p-6 md:p-8">
+        <div class="flex items-center gap-3 border-b border-zinc-100 dark:border-zinc-800 pb-4 mb-6">
+            <div class="p-3 bg-amber-500/10 text-amber-600 dark:text-amber-500 rounded-xl">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+            </div>
+            <div>
+                <h2 class="text-xl font-bold text-zinc-800 dark:text-white">Xodimlar va Kunlik Chiqimlar</h2>
+                <p class="text-xs text-zinc-500 dark:text-zinc-400">Kassadan chiqayotgan pullarni tizimga toifa bo'yicha kiriting</p>
+            </div>
+        </div>
+
+        <form method="POST" class="space-y-5">
+            {% csrf_token %}
+
+            <div>
+                <label class="block text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide mb-1.5">Xarajat Kategoriyasi</label>
+                <select name="category" required class="w-full text-sm border border-zinc-200 dark:border-zinc-700 rounded-xl p-3 bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-white focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none transition">
+                    {% for cat in categories %}
+                    <option value="{{ cat.id }}">{{ cat.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide mb-1.5">Summasi (so'm)</label>
+                    <input type="number" step="0.01" name="amount" required class="w-full text-sm border border-zinc-200 dark:border-zinc-700 rounded-xl p-3 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none transition">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide mb-1.5">Xodim (ixtiyoriy)</label>
+                    <select name="staff_member" class="w-full text-sm border border-zinc-200 dark:border-zinc-700 rounded-xl p-3 bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-white focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none transition">
+                        <option value="">-- Umumiy xarajat --</option>
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide mb-1.5">Izoh / Maqsad</label>
+                <textarea name="comment" required rows="3" placeholder="Masalan: Nonvoy Umar akaga yo'l haqi berildi" class="w-full text-sm border border-zinc-200 dark:border-zinc-700 rounded-xl p-3 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none transition"></textarea>
+            </div>
+
+            <div class="flex gap-4 pt-2">
+                <button type="submit" class="flex-1 bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-6 rounded-xl text-xs uppercase tracking-wider transition shadow-sm cursor-pointer">
+                    Saqlash
+                </button>
+                <a href="{% url 'sales:seller_report' %}" class="bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 font-bold py-3 px-6 rounded-xl text-xs uppercase tracking-wider transition text-center">
+                    Orqaga
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

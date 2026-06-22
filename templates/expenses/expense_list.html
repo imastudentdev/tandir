@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="min-h-screen text-gray-100 pb-12 select-none">
+    
+    <div class="border-b border-gray-800 pb-4 mb-6 flex flex-wrap justify-between items-center gap-4">
+        <div>
+            <h1 class="text-2xl font-black text-white flex items-center gap-2">💸 Chiqimlar va Xarajatlar</h1>
+            <p class="text-xs text-gray-400">Kunlik kommunal, ijara, un transporti va boshqa tezkor chiqimlarni qayd etish paneli.</p>
+        </div>
+        <div class="bg-red-950/30 border border-red-900/60 rounded-xl px-6 py-3 text-right">
+            <span class="text-[10px] font-mono text-red-400 uppercase tracking-wider block">Jami Chiqimlar summasi</span>
+            <span class="text-xl font-black text-red-500 font-mono">{{ total_expense|floatformat:0 }} UZS</span>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 h-fit shadow-xl">
+            <h2 class="text-sm font-black text-white uppercase tracking-wider border-b border-gray-800 pb-2 mb-4 flex items-center gap-2">
+                📥 Yangi Chiqim Kirish
+            </h2>
+            <form method="POST" action="{% url 'expenses:manage_expenses' %}" class="space-y-4">
+                {% csrf_token %}
+                
+                <div class="space-y-1">
+                    <label class="block text-[11px] font-mono text-gray-400 uppercase">Kategoriya / Toifa:</label>
+                    <select name="category" required class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2.5 text-xs text-gray-300 focus:outline-none focus:border-amber-500">
+                        <option value="">--- Tanlang ---</option>
+                        {% for cat in categories %}
+                            <option value="{{ cat.id }}">{{ cat.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="space-y-1">
+                    <label class="block text-[11px] font-mono text-gray-400 uppercase">Xarajat Summasi (UZS):</label>
+                    <input type="number" name="amount" required min="1" placeholder="Masalan: 150000"
+                           class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2.5 text-xs font-mono font-bold text-red-400 focus:outline-none focus:border-red-500">
+                </div>
+
+                <div class="space-y-1">
+                    <label class="block text-[11px] font-mono text-gray-400 uppercase">Xodim (Agar tegishli bo'lsa):</label>
+                    <select name="staff_member" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2.5 text-xs text-gray-300 focus:outline-none focus:border-amber-500">
+                        <option value="">Hamma uchun / Aloqasiz</option>
+                        {% for user_obj in form.fields.staff_member.queryset %}
+                            <option value="{{ user_obj.id }}">{{ user_obj.full_name|default:user_obj.username }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="space-y-1">
+                    <label class="block text-[11px] font-mono text-gray-400 uppercase">Batafsil Izoh:</label>
+                    <textarea name="comment" rows="3" required placeholder="Nima maqsadda ishlatildi? (Masalan: Qop yuklagan mardikorlar haqi)"
+                              class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2.5 text-xs text-gray-300 focus:outline-none focus:border-amber-500"></textarea>
+                </div>
+
+                <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-gray-950 font-black py-2.5 rounded-xl text-xs transition uppercase tracking-wider">
+                    Xarajatni Tasdiqlash 🛑
+                </button>
+            </form>
+        </div>
+
+        <div class="lg:col-span-2 bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden shadow-xl flex flex-col justify-between">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-950 border-b border-gray-800 text-[10px] font-mono text-gray-400 uppercase tracking-wider">
+                            <th class="p-4">Sana</th>
+                            <th class="p-4">Toifa</th>
+                            <th class="p-4">Izoh / Tegishli Xodim</th>
+                            <th class="p-4 text-right">Summa</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-800/50 text-xs">
+                        {% for exp in expenses %}
+                        <tr class="hover:bg-gray-950/30 transition">
+                            <td class="p-4 font-mono text-gray-500">{{ exp.date|date:"d.m.Y" }}</td>
+                            <td class="p-4">
+                                <span class="bg-gray-950 border border-gray-800 px-2 py-1 rounded-md font-medium text-gray-300">{{ exp.category.name }}</span>
+                            </td>
+                            <td class="p-4 max-w-xs">
+                                <p class="text-white font-medium truncate">{{ exp.comment }}</p>
+                                {% if exp.staff_member %}
+                                    <p class="text-[10px] text-amber-500 mt-0.5">👤 Xodim: {{ exp.staff_member.full_name|default:exp.staff_member.username }}</p>
+                                {% endif %}
+                            </td>
+                            <td class="p-4 text-right font-mono font-black text-red-400">
+                                -{{ exp.amount|floatformat:0 }} UZS
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="p-12 text-center text-gray-500 font-medium">🧾 Hozircha chiqimlar ro'yxati bo'sh!</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

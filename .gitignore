@@ -1,0 +1,41 @@
+# Django build va kesh fayllari
+*.pyc
+*__pycache__/
+celerybeat-schedule
+modules.sqlite
+
+# Ma'lumotlar bazasi (Lokal rivojlantirish uchun)
+*.sqlite3
+*.db
+
+# Virtual muhit (Virtual environment)
+venv/
+.venv/
+env/
+.env/
+ENV/
+pyvenv.cfg
+
+# Maxfiy ma'lumotlar (Kalitlar va sozlamalar)
+.env
+.ini
+*.log
+*.pot
+
+# Media va Static yuklanmalar (Foydalanuvchi yuklagan fayllar)
+media/
+staticfiles/
+static_root/
+
+# IDE va tahrirlovchi sozlamalari (VS Code, PyCharm va boshqalar)
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# Tizim fayllari
+.DS_Store
+Thumbs.db

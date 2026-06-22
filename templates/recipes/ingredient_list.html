@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="min-h-screen text-gray-100 pb-12 select-none">
+    
+    <div class="border-b border-gray-800 pb-4 mb-6 flex justify-between items-center">
+        <div>
+            <h1 class="text-2xl font-black text-white flex items-center gap-2">🌾 Xomashyolar Balansi</h1>
+            <p class="text-xs text-gray-400">Un, yog', tuz va shakar kabi ingredientlarning minimal qoldiq limitlari nazorati.</p>
+        </div>
+        
+        {% if request.user.role == 'admin' %}
+        <a href="{% url 'recipes:ingredient_create' %}" class="bg-amber-500 hover:bg-amber-600 text-gray-950 font-black px-4 py-2 rounded-xl text-xs transition flex items-center gap-2">
+            ➕ Yangi Xomashyo
+        </a>
+        {% endif %}
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {% for ing in ingredients %}
+            <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 shadow-xl relative overflow-hidden group hover:border-gray-700 transition">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-[10px] font-mono text-gray-500 uppercase tracking-wider">Xomashyo nomi</p>
+                        <h3 class="text-base font-black text-white mt-0.5 group-hover:text-amber-400 transition">{{ ing.name }}</h3>
+                    </div>
+                    <span class="bg-gray-950 text-gray-400 text-[10px] font-mono px-2 py-1 rounded-md border border-gray-800 uppercase">
+                        {{ ing.get_unit_display }}
+                    </span>
+                </div>
+                
+                <div class="mt-6 pt-3 border-t border-gray-800/60 flex justify-between items-center text-xs">
+                    <span class="text-gray-400 font-medium">Minimal qoldiq limiti:</span>
+                    <span class="font-mono font-bold text-amber-500">{{ ing.min_limit }} {{ ing.unit }}</span>
+                </div>
+                
+                <div class="absolute bottom-0 inset-x-0 h-1 bg-gradient-to-r from-amber-500 to-transparent opacity-40"></div>
+            </div>
+        {% empty %}
+            <div class="col-span-full bg-gray-900 border border-gray-800 p-12 rounded-2xl text-center text-gray-500 font-medium">
+                📦 Hozircha birorta ham xomashyo kiritilmagan.
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

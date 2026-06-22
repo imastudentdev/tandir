@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="min-h-screen text-gray-100 pb-12 select-none">
+    
+    <div class="border-b border-gray-800 pb-4 mb-8 flex justify-between items-center">
+        <div>
+            <h1 class="text-2xl font-black text-white flex items-center gap-2">📊 Tizim Boshqaruv Paneli (Dashboard)</h1>
+            <p class="text-xs text-gray-400">Nonvoyxona moliyaviy holati, real vaqtdagi tushumlar va sof foyda tahlili.</p>
+        </div>
+        <div class="text-xs font-mono bg-gray-900 border border-gray-800 px-3 py-1.5 rounded-xl text-gray-400">
+            Bugun: <span class="text-white font-bold">{% now "d.m.Y" %}</span>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-xl relative overflow-hidden group">
+            <span class="text-[10px] font-mono text-emerald-400 uppercase tracking-wider font-bold block">💰 Jami Umumiy Tushum</span>
+            <h2 class="text-2xl font-black text-white mt-1 font-mono tracking-tight">{{ total_sales|floatformat:0 }} <span class="text-xs text-gray-500">UZS</span></h2>
+            <p class="text-[11px] text-gray-400 mt-2">Muvaffaqiyatli yakunlangan buyurtmalar hajmi.</p>
+            <div class="absolute bottom-0 inset-x-0 h-1 bg-emerald-500 opacity-30"></div>
+        </div>
+
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-xl relative overflow-hidden group">
+            <span class="text-[10px] font-mono text-red-400 uppercase tracking-wider font-bold block">🛑 Jami Chiqimlar & Xaridlar</span>
+            <h2 class="text-2xl font-black text-white mt-1 font-mono tracking-tight">{{ total_expenses|floatformat:0 }} <span class="text-xs text-gray-500">UZS</span></h2>
+            <p class="text-[11px] text-gray-400 mt-2">Kommunal, ish haqi va un xaridlari yig'indisi.</p>
+            <div class="absolute bottom-0 inset-x-0 h-1 bg-red-500 opacity-30"></div>
+        </div>
+
+        <div class="border rounded-2xl p-6 shadow-xl relative overflow-hidden group {% if net_profit >= 0 %}bg-emerald-950/20 border-emerald-900/60{% else %}bg-red-950/20 border-red-900/60{% endif %}">
+            <span class="text-[10px] font-mono uppercase tracking-wider font-bold block {% if net_profit >= 0 %}text-emerald-400{% else %}text-red-400{% endif %}">
+                ✨ Sof Foyda (Balans)
+            </span>
+            <h2 class="text-2xl font-black mt-1 font-mono tracking-tight {% if net_profit >= 0 %}text-emerald-400{% else %}text-red-400{% endif %}">
+                {{ net_profit|floatformat:0 }} <span class="text-xs text-gray-500">UZS</span>
+            </h2>
+            <p class="text-[11px] text-gray-300 mt-2">Barcha xarajatlardan ortgan real sof daromad.</p>
+            <div class="absolute bottom-0 inset-x-0 h-1 {% if net_profit >= 0 %}bg-emerald-400{% else %}bg-red-400{% endif %} opacity-50"></div>
+        </div>
+
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 h-fit shadow-xl space-y-4">
+            <h3 class="text-xs font-black text-white uppercase tracking-wider border-b border-gray-800 pb-2">⚡ Tezkor Navigatsiya</h3>
+            <div class="grid grid-cols-1 gap-2">
+                <a href="{% url 'sales:pos_dashboard' %}" class="w-full bg-gray-950 hover:bg-gray-800 border border-gray-800 rounded-xl p-3 text-xs text-left font-bold flex items-center justify-between transition">
+                    <span>🛒 POS Terminalni Ochish</span>
+                    <span class="text-gray-500">→</span>
+                </a>
+                <a href="{% url 'inventory:dashboard' %}" class="w-full bg-gray-950 hover:bg-gray-800 border border-gray-800 rounded-xl p-3 text-xs text-left font-bold flex items-center justify-between transition">
+                    <span>📦 Ombor Kirim/Chiqimi</span>
+                    <span class="text-gray-500">→</span>
+                </a>
+                <a href="{% url 'expenses:manage_expenses' %}" class="w-full bg-gray-950 hover:bg-gray-800 border border-gray-800 rounded-xl p-3 text-xs text-left font-bold flex items-center justify-between transition">
+                    <span>💸 Chiqim Qayd Etish</span>
+                    <span class="text-gray-500">→</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="lg:col-span-2 bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden shadow-xl">
+            <div class="p-4 bg-gray-950 border-b border-gray-800 flex justify-between items-center">
+                <h3 class="text-xs font-black text-white uppercase tracking-wider">🛒 Oxirgi sotuvlar (Tezkor Log)</h3>
+                <span class="text-[10px] font-mono bg-gray-900 border border-gray-800 px-2 py-0.5 rounded text-emerald-400">Live</span>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-950/40 text-[10px] font-mono text-gray-400 uppercase tracking-wider border-b border-gray-800">
+                            <th class="p-3">ID / Vaqt</th>
+                            <th class="p-3">Mijoz / Turi</th>
+                            <th class="p-3 text-right">Summa</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-800/50 text-xs">
+                        {% for order in recent_orders %}
+                        <tr class="hover:bg-gray-950/20 transition">
+                            <td class="p-3 font-mono text-gray-500">#{{ order.id }} <span class="text-[10px] block">{{ order.created_at|date:"H:i" }}</span></td>
+                            <td class="p-3 font-medium text-white">{{ order.customer_name|default:"Chakana xaridor" }}</td>
+                            <td class="p-3 text-right font-mono font-black text-emerald-400">{{ order.total_amount|floatformat:0 }} UZS</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="p-8 text-center text-gray-500">Hozircha sotuvlar amalga oshirilmadi.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

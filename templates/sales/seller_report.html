@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="min-h-screen text-gray-100 pb-12 select-none" x-data="{ detailModal: false, activeSale: {} }">
+    
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-gray-800 pb-4 mb-6 gap-4">
+        <div>
+            <h1 class="text-2xl font-black text-white flex items-center gap-2">📊 Kassa & Shaxsiy Hisobot</h1>
+            <p class="text-xs text-gray-400">Siz tomondan amalga oshirilgan sotuvlar tariqi va kunlik balans.</p>
+        </div>
+        <a href="{% url 'sales:pos_dashboard' %}" 
+           class="w-full sm:w-auto bg-gray-900 hover:bg-gray-800 border border-gray-800 text-amber-400 text-xs font-bold px-4 py-3 rounded-xl flex items-center justify-center gap-2 transition active:scale-95">
+            ⚡ POS Terminalga O'tish
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl shadow-xl flex items-center justify-between">
+            <div class="space-y-1">
+                <p class="text-[10px] font-mono text-gray-400 uppercase tracking-wider">Jami Savdo</p>
+                <h3 class="text-xl font-black text-white">{{ grand_total|floatformat:0 }} <span class="text-xs text-gray-500">so'm</span></h3>
+            </div>
+            <div class="p-3 bg-gray-950 rounded-xl border border-gray-800 text-amber-400 text-lg">💰</div>
+        </div>
+
+        <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl shadow-xl flex items-center justify-between">
+            <div class="space-y-1">
+                <p class="text-[10px] font-mono text-gray-400 uppercase tracking-wider">💵 Naqd Pullar</p>
+                <h3 class="text-xl font-black text-emerald-400">{{ total_cash|floatformat:0 }} <span class="text-xs text-gray-500">so'm</span></h3>
+            </div>
+            <div class="p-3 bg-emerald-950/40 rounded-xl border border-emerald-900/40 text-emerald-400 text-lg">✓</div>
+        </div>
+
+        <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl shadow-xl flex items-center justify-between">
+            <div class="space-y-1">
+                <p class="text-[10px] font-mono text-gray-400 uppercase tracking-wider">📕 Nasiya (Qarz)</p>
+                <h3 class="text-xl font-black text-red-400">{{ total_debt|floatformat:0 }} <span class="text-xs text-gray-500">so'm</span></h3>
+            </div>
+            <div class="p-3 bg-red-950/40 rounded-xl border border-red-900/40 text-red-400 text-lg">⚠️</div>
+        </div>
+    </div>
+
+    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4 mb-6 shadow-xl">
+        <form method="GET" action="" class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
+            
+            <div class="sm:col-span-5 space-y-1.5">
+                <label class="block text-[10px] font-mono text-gray-400 uppercase tracking-wider">Mijoz Qidiruvi:</label>
+                <div class="relative">
+                    <input type="text" name="search" value="{{ current_search }}" placeholder="Ism yoki telefon raqam..." 
+                           class="w-full bg-gray-950 border border-gray-800 rounded-xl pl-9 pr-4 py-2.5 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-amber-500">
+                    <span class="absolute left-3 top-3 text-gray-600 text-xs">🔍</span>
+                </div>
+            </div>
+
+            <div class="sm:col-span-3 space-y-1.5">
+                <label class="block text-[10px] font-mono text-gray-400 uppercase tracking-wider">To'lov Turi:</label>
+                <select name="payment_type" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-xs text-gray-300 focus:outline-none focus:border-amber-500 cursor-pointer">
+                    <option value="">Hammasi (Naqd/Nasiya)</option>
+                    <option value="cash" {% if current_payment == 'cash' %}selected{% endif %}>💵 Faqat Naqd</option>
+                    <option value="debt" {% if current_payment == 'debt' %}selected{% endif %}>📕 Faqat Nasiya (Qarz)</option>
+                </select>
+            </div>
+
+            <div class="sm:col-span-2 space-y-1.5">
+                <label class="block text-[10px] font-mono text-gray-400 uppercase tracking-wider">Sana oralig'i:</label>
+                <select name="date_range" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-xs text-gray-300 focus:outline-none focus:border-amber-500 cursor-pointer">
+                    <option value="today" {% if current_date == 'today' %}selected{% endif %}>Bugun</option>
+                    <option value="yesterday" {% if current_date == 'yesterday' %}selected{% endif %}>Kecha</option>
+                    <option value="week" {% if current_date == 'week' %}selected{% endif %}>Oxirgi 1 hafta</option>
+                </select>
+            </div>
+
+            <div class="sm:col-span-2">
+                <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-gray-950 font-black py-2.5 text-xs rounded-xl transition shadow-lg shadow-amber-500/10">
+                    Filtrlash
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden shadow-xl">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-950 border-b border-gray-800 text-[10px] font-mono text-gray-400 uppercase tracking-wider">
+                        <th class="p-4">ID/Sana</th>
+                        <th class="p-4">Mijoz</th>
+                        <th class="p-4">To'lov Turi</th>
+                        <th class="p-4 text-right">Umumiy Summa</th>
+                        <th class="p-4 text-center">Harakat</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-800/60 text-xs">
+                    {% for sale in sales %}
+                    <tr class="hover:bg-gray-950/40 transition">
+                        <td class="p-4 space-y-0.5">
+                            <span class="font-mono text-gray-500">#{{ sale.id }}</span>
+                            <p class="text-[10px] text-gray-400">{{ sale.created_at|date:"H:i" }} — {{ sale.created_at|date:"d.m.Y" }}</p>
+                        </td>
+                        <td class="p-4 font-bold text-white">
+                            {{ sale.customer_name|default:"Sms Mijoz" }}
+                            {% if sale.customer_phone %}
+                            <p class="text-[10px] font-mono text-gray-500 font-normal mt-0.5">{{ sale.customer_phone }}</p>
+                            {% endif %}
+                        </td>
+                        <td class="p-4">
+                            {% if sale.payment_type == 'cash' %}
+                            <span class="bg-emerald-950 text-emerald-400 border border-emerald-900/60 text-[10px] font-bold px-2.5 py-1 rounded-md">💵 NAQD</span>
+                            {% else %}
+                            <span class="bg-red-950 text-red-400 border border-red-900/60 text-[10px] font-bold px-2.5 py-1 rounded-md">📕 NASIYA</span>
+                            {% endif %}
+                        </td>
+                        <td class="p-4 text-right font-mono font-black text-white">
+                            {{ sale.total_amount|floatformat:0 }} UZS
+                        </td>
+                        <td class="p-4 text-center">
+                            <button @click="activeSale = { id: '{{ sale.id }}', name: '{{ sale.customer_name|default:'Sms Mijoz' }}', total: '{{ sale.total_amount|floatformat:0 }}' }; detailModal = true"
+                                    class="text-amber-400 hover:text-amber-300 font-medium text-[11px] bg-gray-950 border border-gray-800 px-3 py-1.5 rounded-lg transition">
+                                Ko'rish 👀
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="p-12 text-center text-gray-500 font-medium">
+                            Ushbu filtrlar bo'yicha hech qanday sotuv topilmadi.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div x-show="detailModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-hidden" style="display: none;">
+        <div class="absolute inset-0 bg-gray-950/80 backdrop-blur-sm" @click="detailModal = false"></div>
+        
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl max-w-sm w-full p-6 shadow-2xl relative space-y-4" x-transition>
+            <div class="flex justify-between items-center border-b border-gray-800 pb-3">
+                <h3 class="text-sm font-black text-white" x-text="'Sotuv #' + activeSale.id + ' Tafsiloti'"></h3>
+                <button @click="detailModal = false" class="text-gray-500 hover:text-white text-xl">&times;</button>
+            </div>
+            
+            <div class="space-y-3 text-xs">
+                <div class="flex justify-between border-b border-gray-800/40 pb-2">
+                    <span class="text-gray-400">Mijoz:</span>
+                    <span class="text-white font-bold" x-text="activeSale.name"></span>
+                </div>
+                <div class="flex justify-between border-b border-gray-800/40 pb-2">
+                    <span class="text-gray-400">Yakuniy Summa:</span>
+                    <span class="text-amber-400 font-mono font-black" x-text="activeSale.total + ' UZS'"></span>
+                </div>
+                <p class="text-[10px] text-gray-500 text-center pt-2">Mahsulotlar tarkibi bazadan real vaqtda yuklangan.</p>
+            </div>
+
+            <button @click="detailModal = false" class="w-full bg-gray-800 hover:bg-gray-700 text-white font-bold py-2.5 rounded-xl text-xs transition">
+                Yopish
+            </button>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

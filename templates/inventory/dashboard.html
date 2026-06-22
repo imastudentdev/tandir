@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="min-h-screen text-gray-100 pb-12 select-none">
+    
+    <div class="border-b border-gray-800 pb-4 mb-6 flex flex-wrap justify-between items-center gap-4">
+        <div>
+            <h1 class="text-2xl font-black text-white flex items-center gap-2">📦 Ombor & Xomashyo Nazorati (FIFO)</h1>
+            <p class="text-xs text-gray-400">Eski partiyalar birinchi ishlatiladigan mukammal avtomatik ombor tizimi.</p>
+        </div>
+        
+        {% if request.user.role == 'admin' %}
+        <a href="{% url 'inventory:add_stock' %}" class="bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-black px-4 py-2.5 rounded-xl text-xs transition flex items-center gap-2 uppercase tracking-wider">
+            📥 Yangi Kirim (Xarid)
+        </a>
+        {% endif %}
+    </div>
+
+    <div class="mb-8">
+        <h2 class="text-xs font-black text-amber-500 uppercase tracking-wider mb-3">🌾 Ombordagi Umumiy Sof Qoldiqlar</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {% for item in stock_summary %}
+            <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4 shadow-xl">
+                <span class="text-[10px] font-mono text-gray-500 uppercase block">Mahsulot turi</span>
+                <h3 class="text-base font-black text-white mt-0.5">{{ item.ingredient.name }}</h3>
+                <div class="mt-4 flex justify-between items-end">
+                    <span class="text-xs text-gray-400">Joriy qoldiq:</span>
+                    <span class="text-lg font-black text-emerald-400 font-mono">
+                        {{ item.total_stock|floatformat:3 }} {{ item.ingredient.unit }}
+                    </span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden shadow-xl">
+        <div class="p-4 bg-gray-950 border-b border-gray-800">
+            <h2 class="text-xs font-black text-white uppercase tracking-wider">📜 Ombordagi Aktiv Partiyalar (Tugamagan unlar)</h2>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-950/40 text-[10px] font-mono text-gray-400 uppercase tracking-wider border-b border-gray-800">
+                        <th class="p-4">Kirim Vaqti</th>
+                        <th class="p-4">Xomashyo</th>
+                        <th class="p-4 text-center">Kelgan Miqdor</th>
+                        <th class="p-4 text-center">Qolgan Miqdor (Sarf bo'lmagan)</th>
+                        <th class="p-4 text-right">Sotib Olingan Narxi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-800/50 text-xs font-mono">
+                    {% for batch in batches %}
+                    <tr class="hover:bg-gray-950/20 transition text-gray-300">
+                        <td class="p-4 text-gray-500">{{ batch.created_at|date:"d.m.Y H:i" }}</td>
+                        <td class="p-4 font-sans text-white font-bold">{{ batch.ingredient.name }}</td>
+                        <td class="p-4 text-center text-gray-400">{{ batch.initial_quantity }} {{ batch.ingredient.unit }}</td>
+                        <td class="p-4 text-center">
+                            <span class="bg-emerald-950/80 text-emerald-400 border border-emerald-900/60 px-2 py-1 rounded-md font-black">
+                                {{ batch.remaining_quantity }} {{ batch.ingredient.unit }}
+                            </span>
+                        </td>
+                        <td class="p-4 text-right font-bold text-gray-400">{{ batch.purchase_price|floatformat:0 }} UZS</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="p-12 text-center text-gray-500 font-sans font-medium">📦 Omborda hech qanday aktiv xomashyo partiyasi qolmagan!</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

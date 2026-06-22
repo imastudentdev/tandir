@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="uz" class="h-full bg-gray-950 text-gray-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tandir ERP | Classic Dark UI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <style>
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0b0f19; }
+        ::-webkit-scrollbar-thumb { background: #1f293d; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #374151; }
+    </style>
+</head>
+<body class="h-full font-sans antialiased bg-gray-950 text-gray-100 flex flex-col md:flex-row" 
+      x-data="{ sidebarOpen: false, toasts: [] }"
+      @toast.window="toasts.push({ id: Date.now(), type: $event.detail.type, text: $event.detail.text })">
+
+    <div class="fixed top-5 right-5 z-50 flex flex-col gap-3 w-full max-w-sm px-4">
+        <template x-for="toast in toasts" :key="toast.id">
+            <div x-init="setTimeout(() => toasts = toasts.filter(t => t.id !== toast.id), 4500)"
+                 :class="{
+                    'bg-emerald-950 border-emerald-500 text-emerald-300': toast.type === 'success',
+                    'bg-red-950 border-red-500 text-red-300': toast.type === 'error',
+                    'bg-amber-950 border-amber-500 text-amber-300': toast.type === 'warning'
+                 }"
+                 class="flex items-center justify-between p-4 rounded-lg border shadow-2xl backdrop-blur-md transition-all duration-300">
+                <div class="flex items-center gap-2">
+                    <span x-text="toast.type === 'success' ? '✅' : (toast.type === 'error' ? '❌' : '⚠️')"></span>
+                    <p class="text-sm font-medium" x-text="toast.text"></p>
+                </div>
+                <button @click="toasts = toasts.filter(t => t.id !== toast.id)" class="text-gray-400 hover:text-white ml-3">&times;</button>
+            </div>
+        </template>
+    </div>
+
+    <div class="md:hidden w-full bg-gray-900 border-b border-gray-800 p-4 flex justify-between items-center z-40">
+        <span class="text-amber-500 font-black text-xl tracking-wider">TANDIR <span class="text-white text-xs font-light">ERP</span></span>
+        <button @click="sidebarOpen = !sidebarOpen" class="text-gray-400 hover:text-white">
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+        </button>
+    </div>
+
+    <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
+           class="fixed inset-y-0 left-0 w-64 bg-gray-900 border-r border-gray-800 z-30 transform md:relative md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col justify-between">
+        <div>
+            <div class="h-16 flex items-center justify-center border-b border-gray-800 bg-gray-950">
+                <span class="text-amber-500 font-black text-2xl tracking-widest">TANDIR <span class="text-xs text-gray-400 font-normal">v2.1</span></span>
+            </div>
+
+            <nav class="mt-4 px-3 space-y-1">
+                <a href="{% url 'reports:dashboard' %}" class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg text-gray-300 hover:bg-gray-800 hover:text-amber-500 transition {% if 'reports' in request.path %} bg-gray-800 text-amber-500 {% endif %}">
+                    📊 Asosiy Dashboard
+                </a>
+                
+                <a href="{% url 'sales:pos_dashboard' %}" class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg text-gray-300 hover:bg-gray-800 hover:text-amber-500 transition {% if 'sales' in request.path %} bg-gray-800 text-amber-500 {% endif %}">
+                    🛒 Sotuv Terminali (POS)
+                </a>
+                
+                <a href="{% url 'production:plan_list' %}" class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg text-gray-300 hover:bg-gray-800 hover:text-amber-500 transition {% if 'production' in request.path %} bg-gray-800 text-amber-500 {% endif %}">
+                    🧑‍🍳 Ishlab Chiqarish & Ombor
+                </a>
+                <a href="{% url 'recipes:recipe_list' %}" class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg text-gray-300 hover:bg-gray-800 hover:text-amber-500 transition {% if 'recipes' in request.path %} bg-gray-800 text-amber-500 {% endif %}">
+                    📜 Retseptlar & Tarkib
+                </a>
+                <a href="{% url 'inventory:dashboard' %}" class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg text-gray-300 hover:bg-gray-800 hover:text-amber-500 transition {% if 'inventory' in request.path %} bg-gray-800 text-amber-500 {% endif %}">
+                    📦 Xomashyo Ombori
+                </a>
+                <a href="{% url 'expenses:manage_expenses' %}" class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg text-gray-300 hover:bg-gray-800 hover:text-amber-500 transition {% if 'expenses' in request.path and not 'staff-expense' in request.path %} bg-gray-800 text-amber-500 {% endif %}">
+                    💸 Chiqimlar (Xarajatlar)
+                </a>
+            </nav>
+        </div>
+
+        <div class="p-4 border-t border-gray-800 bg-gray-950 flex items-center justify-between">
+            <div class="flex flex-col truncate mr-2">
+                <span class="text-sm font-bold text-gray-200 truncate">{{ request.user.full_name|default:"Xodim" }}</span>
+                <span class="text-xs text-amber-500 capitalize">{{ request.user.get_role_display|default:"Kirilmagan" }}</span>
+            </div>
+            
+            <form action="{% url 'users:logout' %}" method="post" class="inline-block m-0 p-0">
+                {% csrf_token %}
+                <button type="submit" class="text-gray-500 hover:text-red-400 p-2 rounded-lg transition bg-transparent border-none cursor-pointer flex items-center justify-center focus:outline-none" title="Tizimdan chiqish">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <main class="flex-1 min-w-0 bg-gray-950 p-4 md:p-8 overflow-y-auto z-10">
+        {% if messages %}
+            <div x-init="{% for message in messages %} $dispatch('toast', { type: '{{ message.tags }}', text: '{{ message|escapejs }}' }); {% endfor %}"></div>
+        {% endif %}
+        {% block content %}{% endblock %}
+    </main>
+    
+    <script>
+        document.body.addEventListener('htmx:configRequest', (event) => {
+            event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
+        });
+        document.body.addEventListener('htmx:responseError', (event) => {
+            window.dispatchEvent(new CustomEvent('toast', {
+                detail: { type: 'error', text: event.detail.xhr.responseText || 'Tizim xatoligi yuz berdi.' }
+            }));
+        });
+    </script>
+</body>
+</html>

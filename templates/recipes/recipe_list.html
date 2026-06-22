@@ -1,0 +1,64 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="min-h-screen text-gray-100 pb-12 select-none">
+    
+    <div class="border-b border-gray-800 pb-4 mb-6 flex justify-between items-center">
+        <div>
+            <h1 class="text-2xl font-black text-white flex items-center gap-2">📜 Mahsulotlar Retseptlari</h1>
+            <p class="text-xs text-gray-400">1 dona tayyor non yoki mahsulot chiqarish uchun sarflanadigan xomashyo normalari.</p>
+        </div>
+        
+        {% if request.user.role == 'admin' %}
+        <a href="{% url 'recipes:recipe_create' %}" class="bg-amber-500 hover:bg-amber-600 text-gray-950 font-black px-4 py-2 rounded-xl text-xs transition flex items-center gap-2">
+            🛠️ Yangi Retsept Tuzish
+        </a>
+        {% endif %}
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {% for recipe in recipes %}
+            <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-xl flex flex-col justify-between relative overflow-hidden">
+                <div>
+                    <div class="flex justify-between items-start border-b border-gray-800 pb-3 mb-4">
+                        <div>
+                            <span class="text-[10px] font-mono text-amber-500 uppercase tracking-wider font-bold">Tayyor Maxsulot</span>
+                            <h2 class="text-lg font-black text-white">{{ recipe.product.name }}</h2>
+                        </div>
+                        {% if request.user.role == 'admin' %}
+                        <a href="{% url 'recipes:recipe_edit' recipe.pk %}" class="bg-gray-950 border border-gray-800 text-gray-400 hover:text-white hover:bg-gray-800 p-2 rounded-xl text-xs transition font-bold flex items-center gap-1">
+                            ✏️ Tahrirlash
+                        </a>
+                        {% endif %}
+                    </div>
+
+                    {% if recipe.description %}
+                    <p class="text-xs text-gray-400 bg-gray-950 border border-gray-800 p-3 rounded-xl mb-4 italic leading-relaxed">
+                        💡 {{ recipe.description }}
+                    </p>
+                    {% endif %}
+
+                    <h3 class="text-[11px] font-mono text-gray-400 uppercase tracking-wider mb-2 font-black">1 dona uchun sarf normasi:</h3>
+                    <div class="space-y-1.5">
+                        {% for item in recipe.items.all %}
+                        <div class="flex justify-between items-center bg-gray-950/60 border border-gray-800/40 px-3 py-2 rounded-xl text-xs">
+                            <span class="text-gray-300 font-medium">🌾 {{ item.ingredient.name }}</span>
+                            <span class="font-mono font-black text-emerald-400">{{ item.quantity }} {{ item.ingredient.unit }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="text-[10px] text-gray-500 font-mono text-right mt-6">
+                    Yangilangan vaqt: {{ recipe.updated_at|date:"d.m.Y, H:i" }}
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-span-full bg-gray-900 border border-gray-800 p-12 rounded-2xl text-center text-gray-500 font-medium">
+                📋 Hozirda birorta ham tayyor mahsulot retsepti mavjud emas!
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
