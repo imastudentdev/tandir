@@ -13,6 +13,8 @@ from .services import ProductionService
 from apps.products.models import Product
 from apps.users.models import CustomUser
 from apps.expenses.models import Expense, ExpenseCategory
+from datetime import datetime, timedelta
+
 
 class ProductionHistoryListView(ListView):
     """Kiritilgan kunlik ishlab chiqarish faktlari ro'yxati va nonvoy oylik xulosasi"""
@@ -29,8 +31,15 @@ class ProductionHistoryListView(ListView):
         return super().dispatch(request, *args, **kwargs)
     
     def get_queryset(self):
-        today = timezone.now().date()
-        qs = ProductionRecord.objects.filter(created_at__date=today).select_related('product', 'baker')
+        # Timezone muammosini hal qilish uchun kun boshlanishi va tugashini aniqlaymiz
+        today_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        today_end = today_start + timedelta(days=1)
+        
+        # created_at__range orqali bugungi kun chegarasidagi barcha yozuvlarni olamiz
+        qs = ProductionRecord.objects.filter(
+            created_at__range=(today_start, today_end)
+        ).select_related('product', 'baker')
+        
         if self.request.user.role == 'baker':
             return qs.filter(baker=self.request.user)
         return qs
@@ -39,20 +48,20 @@ class ProductionHistoryListView(ListView):
         context = super().get_context_data(**kwargs)
         context['products'] = Product.objects.filter(recipe__isnull=False)
         
-        context['total_actual_baked'] = self.get_queryset().aggregate(Sum('actual_quantity'))['actual_quantity__sum'] or 0
+        # Bugungi queryset xavfsiz vaqt oralig'ida
+        today_records = self.get_queryset()
+        
+        context['total_actual_baked'] = today_records.aggregate(Sum('actual_quantity'))['actual_quantity__sum'] or 0
         
         if self.request.user.role == 'baker':
-            context['baker_today_earned'] = ProductionRecord.objects.filter(
-                baker=self.request.user,
-                created_at__date=timezone.now().date()
-            ).aggregate(
+            # Daromad hisoblashda ham to'g'ri filtrdan foydalanamiz
+            context['baker_today_earned'] = today_records.aggregate(
                 earned=Sum(F('actual_quantity') * F('product__worker_share'))
             )['earned'] or 0
         else:
             context['baker_today_earned'] = 0
             
         return context
-
 
 class RecordProductionView(CreateView):
     """Nonvoy yoki Admin tayyor mahsulotni to'g'ridan to'g'ri omborga kiritish oynasi"""
