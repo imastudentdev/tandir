@@ -6,13 +6,31 @@
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-gray-800 pb-4 mb-6 gap-4">
         <div>
             <h1 class="text-2xl font-black text-white flex items-center gap-2">📊 Kassa & Shaxsiy Hisobot</h1>
-            <p class="text-xs text-gray-400">Siz tomondan amalga oshirilgan sotuvlar tariqi va kunlik balans.</p>
+            <p class="text-xs text-gray-400">Siz tomondan amalga oshirilgan sotuvlar tarixi va kunlik balans.</p>
         </div>
-        <a href="{% url 'sales:pos_dashboard' %}" 
-           class="w-full sm:w-auto bg-gray-900 hover:bg-gray-800 border border-gray-800 text-amber-400 text-xs font-bold px-4 py-3 rounded-xl flex items-center justify-center gap-2 transition active:scale-95">
-            ⚡ POS Terminalga O'tish
-        </a>
+        <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+            <!-- Vitrinadan asosiy omborga tovar qaytarish tugmasi -->
+            <a href="{% url 'sales:return_stock' %}" 
+               class="bg-gray-900 hover:bg-gray-800 border border-gray-800 text-red-400 text-xs font-bold px-4 py-3 rounded-xl flex items-center justify-center gap-2 transition active:scale-95">
+                🔄 Vitrinani Omborg Qaytarish (Vazvrat)
+            </a>
+            <a href="{% url 'sales:pos_dashboard' %}" 
+               class="bg-gray-900 hover:bg-gray-800 border border-gray-800 text-amber-400 text-xs font-bold px-4 py-3 rounded-xl flex items-center justify-center gap-2 transition active:scale-95">
+                ⚡ POS Terminalga O'tish
+            </a>
+        </div>
     </div>
+
+    <!-- Xabarlar bloki (Alerts) -->
+    {% if messages %}
+    <div class="mb-4 space-y-2">
+        {% for message in messages %}
+        <div class="p-4 rounded-xl text-xs font-bold {% if message.tags == 'error' %}bg-red-950 text-red-400 border border-red-900{% else %}bg-emerald-950 text-emerald-400 border border-emerald-900{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
 
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl shadow-xl flex items-center justify-between">
@@ -42,7 +60,6 @@
 
     <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4 mb-6 shadow-xl">
         <form method="GET" action="" class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
-            
             <div class="sm:col-span-5 space-y-1.5">
                 <label class="block text-[10px] font-mono text-gray-400 uppercase tracking-wider">Mijoz Qidiruvi:</label>
                 <div class="relative">
@@ -114,7 +131,7 @@
                             {{ sale.total_amount|floatformat:0 }} UZS
                         </td>
                         <td class="p-4 text-center">
-                            <button @click="activeSale = { id: '{{ sale.id }}', name: '{{ sale.customer_name|default:'Sms Mijoz' }}', total: '{{ sale.total_amount|floatformat:0 }}' }; detailModal = true"
+                            <button @click="activeSale = { id: '{{ sale.id }}', name: '{{ sale.customer_name|default:'Sms Mijoz' }}', total: '{{ sale.total_amount|floatformat:0 }}', delete_url: '{% url 'sales:delete_sale' sale.id %}' }; detailModal = true"
                                     class="text-amber-400 hover:text-amber-300 font-medium text-[11px] bg-gray-950 border border-gray-800 px-3 py-1.5 rounded-lg transition">
                                 Ko'rish 👀
                             </button>
@@ -132,6 +149,7 @@
         </div>
     </div>
 
+    <!-- Xarid tafsilotlari va Vazvrat qilish modali -->
     <div x-show="detailModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-hidden" style="display: none;">
         <div class="absolute inset-0 bg-gray-950/80 backdrop-blur-sm" @click="detailModal = false"></div>
         
@@ -150,12 +168,20 @@
                     <span class="text-gray-400">Yakuniy Summa:</span>
                     <span class="text-amber-400 font-mono font-black" x-text="activeSale.total + ' UZS'"></span>
                 </div>
-                <p class="text-[10px] text-gray-500 text-center pt-2">Mahsulotlar tarkibi bazadan real vaqtda yuklangan.</p>
+                <p class="text-[10px] text-gray-500 text-center pt-2">Ehtiyot bo'ling: pastdagi tugma chekni o'chirib, tovarlarni vitrinaga qaytaradi.</p>
             </div>
 
-            <button @click="detailModal = false" class="w-full bg-gray-800 hover:bg-gray-700 text-white font-bold py-2.5 rounded-xl text-xs transition">
-                Yopish
-            </button>
+            <!-- Yangi qo'shilgan Vazvrat / O'chirish tugmasi -->
+            <div class="grid grid-cols-2 gap-2 pt-2">
+                <a :href="activeSale.delete_url" 
+                   onclick="return confirm('Haqiqatdan ham ushbu sotuvni bekor qilib, tovarlarni kassa balansiga qaytarmoqchimisiz?')"
+                   class="bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl text-xs text-center transition flex items-center justify-center">
+                    ❌ Sotuvni Bekor Qilish
+                </a>
+                <button @click="detailModal = false" class="bg-gray-800 hover:bg-gray-700 text-white font-bold py-2.5 rounded-xl text-xs transition">
+                    Yopish
+                </button>
+            </div>
         </div>
     </div>
 

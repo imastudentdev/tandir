@@ -22,6 +22,13 @@
         </div>
 
         <div class="flex items-center gap-2 ml-auto">
+            {% if request.user.role == 'seller' %}
+            <a href="{% url 'sales:request_stock' %}" 
+               class="bg-amber-950/40 text-amber-400 border border-amber-900/60 px-3 py-2 rounded-xl text-xs font-bold hover:bg-amber-500 hover:text-gray-950 transition flex items-center gap-1.5">
+                📥 Ombordan Non Olish
+            </a>
+            {% endif %}
+
             <a href="{% url 'sales:add_staff_expense' %}" 
                class="bg-red-950/40 text-red-400 border border-red-900/60 px-3 py-2 rounded-xl text-xs font-medium hover:bg-red-900 hover:text-white transition flex items-center gap-1.5">
                 💸 Xarajat Qayd Etish
@@ -33,6 +40,7 @@
         </div>
     </div>
 </div>
+
 <div x-data="posTerminal()" x-init="initPOS()" class="relative min-h-screen text-gray-100 select-none">
     
     <div class="flex items-center justify-between bg-gray-900/50 border border-gray-800 rounded-xl px-4 py-2.5 mb-6 text-xs">
@@ -45,8 +53,11 @@
                 Vitrinalar holati: <span class="text-white font-bold">{{ total_vitrina_count }} turdagi mahsulot faol</span>
             </span>
         </div>
-        {% if total_vitrina_count == 0 %}
-        <span class="text-amber-400 font-bold animate-pulse">⚠️ Admin vitrinangizga mahsulot tarqatishi kerak!</span>
+        {% if total_vitrina_count == 0 and request.user.role == 'seller' %}
+        <div class="flex items-center gap-2">
+            <span class="text-amber-400 font-bold animate-pulse">⚠️ Vitrinangiz bo'sh! Ombordan non so'rang:</span>
+            <a href="{% url 'sales:request_stock' %}" class="bg-amber-500 text-gray-950 font-black px-2 py-1 rounded text-[11px]">Talabnoma yuborish</a>
+        </div>
         {% endif %}
     </div>
 
@@ -57,7 +68,7 @@
         </div>
         
         <button @click="cartOpen = true" 
-                class="w-full sm:w-auto relative bg-amber-500 hover:bg-amber-600 text-gray-950 font-black px-5 py-3 rounded-xl flex items-center justify-center gap-3 shadow-lg shadow-amber-500/10 transition active:scale-95">
+                class="w-full sm:w-auto relative bg-amber-500 hover:bg-amber-600 text-gray-950 font-black px-5 py-3 rounded-xl flex items-center justify-center gap-3 shadow-lg shadow-amber-500/10 transition active:scale-95 z-20">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 0a2 2 0 100 4 2 2 0 000-4z"/></svg>
             <span>Savatni Ko'rish</span>
             <span class="bg-gray-950 text-amber-400 text-xs font-mono px-2.5 py-0.5 rounded-full" x-text="cart.length">0</span>
@@ -67,11 +78,9 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         <template x-for="product in products" :key="product.id">
             <div class="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden shadow-xl flex flex-col justify-between hover:border-gray-700 transition duration-200">
-                
                 <div class="relative h-44 bg-gray-950 flex items-center justify-center border-b border-gray-800">
                     <img :src="product.image_url" class="object-cover h-full w-full opacity-70" alt="Bread">
                     <span class="absolute top-3 left-3 bg-gray-950/90 text-[10px] text-gray-400 px-2 py-0.5 rounded font-mono border border-gray-800" x-text="'SKU: ' + product.sku"></span>
-                    
                     <span :class="getRemainingStock(product) > 10 ? 'bg-emerald-950/90 text-emerald-400 border-emerald-900' : 'bg-red-950/90 text-red-400 border-red-900'"
                           class="absolute top-3 right-3 border text-xs px-2.5 py-0.5 rounded-lg font-bold" 
                           x-text="getRemainingStock(product) + ' ta qoldi'"></span>
@@ -80,7 +89,7 @@
                 <div class="p-4 space-y-4 flex-1 flex flex-col justify-between">
                     <div>
                         <h3 class="text-base font-bold text-white truncate" x-text="product.name"></h3>
-                        <p class="text-xs text-gray-500 mt-0.5">Tandirdan uzilgan oliy navli non mahsuloti.</p>
+                        <p class="text-xs text-gray-500 mt-0.5">Tandirdan uzilgan tayyor mahsulot.</p>
                     </div>
 
                     <div class="bg-gray-950 p-3 rounded-xl border border-gray-800/80 space-y-1">
@@ -103,11 +112,11 @@
         </template>
     </div>
 
-    <div x-show="cartOpen" class="fixed inset-0 z-50 overflow-hidden" style="display: none;" x-transition>
+    <div x-show="cartOpen" class="fixed inset-0 z-[99999] overflow-hidden" style="display: none;" x-transition>
         <div class="absolute inset-0 bg-gray-950/80 backdrop-blur-md transition-opacity" @click="cartOpen = false"></div>
         
         <div class="absolute inset-y-0 right-0 pl-10 max-w-full flex sm:pl-16">
-            <div class="w-screen max-w-md bg-gray-900 border-l border-gray-800 flex flex-col justify-between shadow-2xl relative">
+            <div class="w-screen max-w-md bg-gray-900 border-l border-gray-800 flex flex-col justify-between shadow-2xl relative h-full">
                 
                 <div class="p-4 border-b border-gray-800 bg-gray-950 flex justify-between items-center sticky top-0 z-10">
                     <div class="flex items-center gap-3">
@@ -166,7 +175,7 @@
                         <input type="text" x-model="customerName" placeholder="Mijoz ismi (Nasiya uchun majburiy)" 
                                class="w-full bg-gray-900 border border-gray-800 rounded-xl px-3 py-2.5 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-amber-500">
                         
-                        <input type="text" x-model="customerPhone" placeholder="Telefon (Masalan: +998901234567)" 
+                        <input type="text" x-model="customerPhone" placeholder="Telefon (+998901234567)" 
                                class="w-full bg-gray-900 border border-gray-800 rounded-xl px-3 py-2.5 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-amber-500 font-mono">
                         
                         <div class="grid grid-cols-2 gap-2 pt-1">
@@ -216,14 +225,12 @@ function posTerminal() {
             });
         },
 
-        // MAHSULOTNING SAVATDAGI BARCHA NARX TURLARI BO'YICHA UMUMIY SONI
         getTotalQtyInCart(productId) {
             return this.cart
                 .filter(item => item.id === productId)
                 .reduce((sum, item) => sum + item.quantity, 0);
         },
 
-        // CARDDA KO'RINADIGAN HAQIQIY JORIY QOLDIQ
         getRemainingStock(product) {
             let allocated = this.getTotalQtyInCart(product.id);
             return product.stock_qty - allocated;
@@ -233,10 +240,9 @@ function posTerminal() {
             let selectedType = product.selectedPriceType;
             let currentPrice = product.prices[selectedType];
             
-            // Global (barcha turlar bo'yicha) qoldiqni tekshirish
             if (this.getTotalQtyInCart(product.id) >= product.stock_qty) {
                 window.dispatchEvent(new CustomEvent('toast', {
-                    detail: { type: 'error', text: `⚠️ Vitrinada ushbu nondan jami ${product.stock_qty} ta bor. Chegaradan oshib bo'lmaydi!` }
+                    detail: { type: 'error', text: `⚠️ Zaxirada jami ${product.stock_qty} ta bor. Chegaradan oshib bo'lmaydi!` }
                 }));
                 return;
             }
@@ -258,26 +264,22 @@ function posTerminal() {
             window.dispatchEvent(new CustomEvent('toast', { detail: { type: 'success', text: 'Savatga qo\'shildi!' } }));
         },
 
-        // SILLIQ INPUNT INTEGRATSIYASI (Yozuv xalaqit bermaydi, o'chirib yozsa bo'ladi)
         handleInputQuantity(event, item) {
             let valStr = event.target.value.replace(/[^0-9]/g, '');
             if (valStr === '') {
-                item.quantity = 0; // O'chirganda vaqtinchalik 0 bo'lib turadi
+                item.quantity = 0;
                 return;
             }
             
             let valInt = parseInt(valStr, 10);
-            
-            // Boshqa narxdagi xuddi shu nonlar yig'indisini topamiz
             let otherItemsQty = this.cart
                 .filter(i => i.id === item.id && i.priceType !== item.priceType)
                 .reduce((sum, i) => sum + i.quantity, 0);
 
-            // Jami chegaradan oshsa qulflaymiz (Siz aytgan 60 do'kon + 50 to'y muammosi yechimi!)
             if (otherItemsQty + valInt > item.maxStock) {
                 let allowedMax = item.maxStock - otherItemsQty;
                 window.dispatchEvent(new CustomEvent('toast', {
-                    detail: { type: 'error', text: `⚠️ Vitrina limiti buzildi! Ushbu narxda ko'pi bilan ${allowedMax} ta yozishingiz mumkin.` }
+                    detail: { type: 'error', text: `⚠️ Vitrina limiti buzildi! Maksimal miqdor: ${allowedMax} ta.` }
                 }));
                 item.quantity = allowedMax;
                 event.target.value = allowedMax;
@@ -292,7 +294,6 @@ function posTerminal() {
 
         clearCart() {
             this.cart = [];
-            window.dispatchEvent(new CustomEvent('toast', { detail: { type: 'warning', text: 'Savat butunlay tozalandi.' } }));
         },
 
         getCartTotal() {
@@ -300,12 +301,11 @@ function posTerminal() {
         },
 
         submitPOSSale() {
-            // Oxirgi tekshiruv (0 bo'lib qolgan elementlarni tozalash yoki to'g'rilash)
             this.cart = this.cart.filter(item => item.quantity > 0);
             if (this.cart.length === 0) return;
             
             if (this.paymentType === 'debt' && (!this.customerName || !this.customerPhone)) {
-                window.dispatchEvent(new CustomEvent('toast', { detail: { type: 'error', text: '🔴 NASIYAGA sotish uchun mijoz ismi va telefoni kiritilishi shart!' } }));
+                window.dispatchEvent(new CustomEvent('toast', { detail: { type: 'error', text: '🔴 NASIYAGA sotish uchun mijoz ismi va telefoni majburiy!' } }));
                 return;
             }
 
@@ -315,28 +315,23 @@ function posTerminal() {
                 price_type: item.priceType
             }));
 
-            // TELEGRAM CHEK GENERATOR
+            // TELEGRAM CHEK
+            window.currentUserFullName = "{{ request.user.full_name|escapejs }}";
             let chekText = `=====================\n`;
             chekText += `🍞 *TANDIR ERP - RASMIY CHEK*\n`;
             chekText += `=====================\n`;
             chekText += `👤 Xaridor: ${this.customerName || 'Mijoz'}\n`;
             chekText += `📞 Tel: ${this.customerPhone || 'Kiritilmagan'}\n`;
-            chekText += `💳 To'lov: ${this.paymentType === 'cash' ? 'NAQD PUL' : 'NASIYA (QARZ)'}\n`;
             chekText += `---------------------\n`;
-            
             this.cart.forEach(item => {
                 chekText += `• ${item.name} (${item.priceType})\n  ${item.quantity} ta x ${item.price.toLocaleString()} so'm\n`;
             });
-            
             chekText += `---------------------\n`;
-            chekText += `💰 *JAMI TUSHUM: ${this.getCartTotal().toLocaleString()} so'm*\n`;
+            chekText += `💰 *JAMI: ${this.getCartTotal().toLocaleString()} so'm*\n`;
             chekText += `=====================\n`;
-            chekText += `Sotuvchi: {{ request.user.username }}\n`;
-            chekText += `Sana: 2026-06-21`;
+            chekText += `Sotuvchi: ${window.currentUserFullName || 'Kassir'}\n`;
 
             let phoneClean = this.customerPhone.replace(/[^0-9+]/g, '');
-            if(!phoneClean.startsWith('+') && phoneClean.length > 0) phoneClean = '+' + phoneClean;
-            
             let tgUrl = phoneClean.length > 5 
                 ? `https://t.me/${phoneClean}?text=${encodeURIComponent(chekText)}`
                 : `https://t.me/share/url?url=${encodeURIComponent(chekText)}`;

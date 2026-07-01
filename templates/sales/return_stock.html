@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-md mx-auto min-h-screen text-gray-100 pb-12 select-none pt-6">
+    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-2xl space-y-4">
+        <div class="border-b border-gray-800 pb-3">
+            <h1 class="text-xl font-black text-white">🔄 Vitrinadan Asosiy Omborg Vazvrat</h1>
+            <p class="text-xs text-gray-400 mt-1">Sotilmay qolgan yoki ortiqcha nonlarni asosiy ombor balansiga qaytarish.</p>
+        </div>
+
+        {% if messages %}
+        <div class="space-y-2">
+            {% for message in messages %}
+            <div class="p-3 rounded-xl text-xs font-bold bg-red-950 text-red-400 border border-red-900">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="POST" action="" class="space-y-4">
+            {% csrf_token %}
+            
+            <div class="space-y-1.5">
+                <label class="block text-xs font-mono text-gray-400 uppercase tracking-wider">Mahsulotni tanlang:</label>
+                <select name="product_id" required class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-xs text-gray-300 focus:outline-none focus:border-amber-500 cursor-pointer">
+                    <option value="">-- Vitrinadagi Tovar --</option>
+                    {% for stock in seller_stock %}
+                        <option value="{{ stock.product.id }}">{{ stock.product.name }} (Sizda: {{ stock.quantity }} ta)</option>
+                    {% empty %}
+                        <option value="" disabled>Vitrinangiz hozircha bo'sh</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="space-y-1.5">
+                <label class="block text-xs font-mono text-gray-400 uppercase tracking-wider">Qaytariladigan Miqdor:</label>
+                <input type="number" name="quantity" min="1" required placeholder="Masalan: 10" 
+                       class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-amber-500">
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 pt-2">
+                <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-gray-950 font-black py-3 text-xs rounded-xl transition shadow-lg shadow-amber-500/10">
+                    Omborga Qaytarish
+                </button>
+                <a href="{% url 'sales:seller_report' %}" class="bg-gray-800 hover:bg-gray-700 text-white font-bold py-3 text-xs rounded-xl text-center transition flex items-center justify-center">
+                    Orqaga
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

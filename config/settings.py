@@ -80,7 +80,6 @@ TIME_ZONE = 'Asia/Tashkent'
 USE_I18N = True
 USE_TZ = True
 
-# Statik va Media fayllar
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')

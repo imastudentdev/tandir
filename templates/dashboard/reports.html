@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="space-y-8 animate-fade-in">
+<div class="space-y-8 animate-fade-in pb-12 select-none text-white">
     
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-gray-800 pb-5 gap-4">
         <div>
@@ -11,30 +11,28 @@
         <div>
             <a href="{% url 'reports:export_sales_excel' %}" 
                class="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-gray-950 font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-emerald-950/20 transition duration-200 text-sm">
-                📥 Excel Hisobotni Yuklash
+               📥 Excel Hisobotni Yuklash (Batafsil Mahsulotli)
             </a>
         </div>
     </div>
 
     <div>
         <h2 class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4 flex items-center gap-2">
-            <span>📅 Bugungi Kunlik Ko'rsatkichlar</span>
+            <span>📅 Bugungi Kunlik Real Tushumlar</span>
             <span class="h-px flex-1 bg-gray-800"></span>
         </h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 hover:border-amber-500/30 transition duration-300">
-                <p class="text-xs font-semibold text-gray-400 uppercase">Bugungi umumiy savdo</p>
+                <p class="text-xs font-semibold text-gray-400 uppercase">Bugungi umumiy savdo (Naqd + Nasiya)</p>
                 <p class="text-2xl font-black text-amber-500 mt-2">{{ today_total_sales|floatformat:0 }} <span class="text-xs font-normal text-gray-400">so'm</span></p>
             </div>
             <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 hover:border-red-500/30 transition duration-300">
-                <p class="text-xs font-semibold text-gray-400 uppercase">Bugungi chiqimlar</p>
+                <p class="text-xs font-semibold text-gray-400 uppercase">Bugungi Kunlik Chiqimlar</p>
                 <p class="text-2xl font-black text-red-400 mt-2">{{ today_expenses|floatformat:0 }} <span class="text-xs font-normal text-gray-400">so'm</span></p>
             </div>
-            <div class="border rounded-xl p-6 {% if is_today_loss %} bg-red-950/20 border-red-900/50 {% else %} bg-emerald-950/20 border-emerald-900/50 {% endif %}">
-                <p class="text-xs font-semibold text-gray-400 uppercase">Bugungi sof foyda</p>
-                <p class="text-2xl font-black mt-2 {% if is_today_loss %} text-red-500 {% else %} text-emerald-400 {% endif %}">
-                    {{ today_net_profit|floatformat:0 }} <span class="text-xs font-normal text-gray-400">so'm</span>
-                </p>
+            <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 hover:border-emerald-500/30 transition duration-300">
+                <p class="text-xs font-semibold text-gray-400 uppercase">Bugungi Sof Kassa O'sishi (Naqd)</p>
+                <p class="text-2xl font-black text-emerald-400 mt-2">{{ today_cash_in_hand|floatformat:0 }} <span class="text-xs font-normal text-gray-400">so'm</span></p>
             </div>
         </div>
     </div>
@@ -46,28 +44,27 @@
         </h2>
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
-                <span class="text-xs text-gray-400 font-medium">💵 Jami naqd tushum</span>
+                <span class="text-xs text-gray-400 font-medium">💵 Jami Naqd Tushum (Sotuvdan)</span>
                 <h3 class="text-xl font-bold text-emerald-400 mt-1">{{ total_cash|floatformat:0 }} <span class="text-xs font-light text-gray-500">so'm</span></h3>
             </div>
             <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
-                <span class="text-xs text-gray-400 font-medium">📕 Bozordagi qarzlar (Nasiya)</span>
-                <h3 class="text-xl font-bold text-red-400 mt-1">{{ total_debt|floatformat:0 }} <span class="text-xs font-light text-gray-500">so'm</span></h3>
+                <span class="text-xs text-gray-400 font-medium">➕ Qarzdan yig'ilgan naqd pullar</span>
+                <h3 class="text-xl font-bold text-sky-400 mt-1">{{ total_collected_debt|floatformat:0 }} <span class="text-xs font-light text-gray-500">so'm</span></h3>
             </div>
             <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
-                <span class="text-xs text-gray-400 font-medium">📊 Umumiy aylanma</span>
-                <h3 class="text-xl font-bold text-amber-500 mt-1">{{ total_sales|floatformat:0 }} <span class="text-xs font-light text-gray-500">so'm</span></h3>
+                <span class="text-xs text-gray-400 font-medium">📕 Aktiv Qarzlar (Bozordagi Haq)</span>
+                <h3 class="text-xl font-bold text-red-400 mt-1">{{ active_market_debts|floatformat:0 }} <span class="text-xs font-light text-gray-500">so'm</span></h3>
             </div>
             <div class="border rounded-xl p-5 {% if is_loss %} bg-red-950/40 border-red-800 {% else %} bg-emerald-950/40 border-emerald-800 {% endif %}">
-                <span class="text-xs text-gray-300 font-medium">💰 Toza sof foyda</span>
+                <span class="text-xs text-gray-300 font-medium">💰 Kassadagi Haqiqiy Naqd Pul</span>
                 <h3 class="text-xl font-black mt-1 {% if is_loss %} text-red-500 {% else %} text-emerald-400 {% endif %}">
-                    {{ net_profit|floatformat:0 }} <span class="text-xs font-light text-gray-400">so'm</span>
+                    {{ real_cash_in_hand|floatformat:0 }} <span class="text-xs font-light text-gray-400">so'm</span>
                 </h3>
             </div>
         </div>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
         <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 lg:col-span-1">
             <h3 class="text-md font-bold text-gray-200 mb-4 flex items-center gap-2">🔥 Eng ko'p sotilganlar</h3>
             <div class="space-y-3">
@@ -87,7 +84,6 @@
 
         <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 lg:col-span-2 space-y-4">
             <h3 class="text-md font-bold text-gray-200 flex items-center gap-2">⚠️ Kritik kamaygan qoldiqlar</h3>
-            
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="space-y-2">
                     <p class="text-xs font-mono text-amber-400 bg-amber-950/40 px-2 py-1 rounded w-fit border border-amber-900">Asosiy Ombor (&lt;50 ta)</p>
@@ -118,7 +114,7 @@
 
     <div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-800 bg-gray-950">
-            <h3 class="text-md font-bold text-gray-200">📕 Nazoratdagi Eng Yirik Nasiyalar (Top 5)</h3>
+            <h3 class="text-md font-bold text-gray-200">📕 Nazoratdagi Eng Yirik Aktiv Nasiyalar (Top 5)</h3>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full text-left text-sm">
@@ -127,7 +123,7 @@
                         <th class="p-4">Xaridor Ismi</th>
                         <th class="p-4">Telefon raqami</th>
                         <th class="p-4">Mas'ul Sotuvchi</th>
-                        <th class="p-4 text-right">Qarz Summasi</th>
+                        <th class="p-4 text-right">Qolgan Qarz Miqdori</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-800 text-gray-300">
@@ -136,11 +132,49 @@
                         <td class="p-4 font-bold text-white">{{ debt.customer_name }}</td>
                         <td class="p-4 font-mono text-gray-400">{{ debt.customer_phone }}</td>
                         <td class="p-4 text-amber-500">{{ debt.seller.username }}</td>
-                        <td class="p-4 text-right font-black text-red-400">{{ debt.total_amount|floatformat:0 }} so'm</td>
+                        <td class="p-4 text-right font-black text-red-400">{{ debt.remaining_debt|floatformat:0 }} so'm</td>
                     </tr>
                     {% empty %}
                     <tr>
                         <td colspan="4" class="p-6 text-center text-gray-500">Faol yirik qarzlar yo'q.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-800 bg-gray-950 flex justify-between items-center">
+            <div>
+                <h3 class="text-md font-bold text-gray-200">🥖 Nonvoylar Ishbay Hisob-kitobi</h3>
+                <p class="text-xs text-gray-400 mt-1">Nonvoylarning bugungi ish hajmi va kassadagi yopilmagan ish haqlari.</p>
+            </div>
+            <span class="text-[11px] font-mono bg-emerald-950 text-emerald-400 border border-emerald-800 px-2 py-0.5 rounded-md">Live tizim</span>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead>
+                    <tr class="bg-gray-950 text-gray-400 border-b border-gray-800 text-xs font-mono">
+                        <th class="p-4">Nonvoy Ismi</th>
+                        <th class="p-4">Bugun Yopgan Noni</th>
+                        <th class="p-4 text-right">Bugungi Ish Haqi</th>
+                        <th class="p-4 text-right">To'lanishi Kerak (Jami)</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-800 text-gray-300">
+                    {% for item in bakers_report %}
+                    <tr class="hover:bg-gray-800/30 transition text-xs">
+                        <td class="p-4 font-bold text-white">👨‍🍳 {{ item.baker.get_full_name|default:item.baker.username }}</td>
+                        <td class="p-4 font-mono font-bold text-amber-400">{{ item.today_baked }} ta</td>
+                        <td class="p-4 text-right font-mono text-emerald-400 font-bold">{{ item.today_earned|floatformat:0 }} so'm</td>
+                        <td class="p-4 text-right font-mono font-black {% if item.unpaid_salary > 0 %}text-red-400{% else %}text-gray-500{% endif %}">
+                            {{ item.unpaid_salary|floatformat:0 }} so'm
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="p-6 text-center text-gray-500">Tizimda nonvoylar mavjud emas.</td>
                     </tr>
                     {% endfor %}
                 </tbody>

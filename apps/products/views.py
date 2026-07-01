@@ -1,7 +1,7 @@
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.contrib import messages
-from apps.users.mixins import AdminRequiredMixin
+from apps.users.mixins import AdminOrManagerRequiredMixin
 from .models import Product, PriceType, ProductPrice
 
 class ProductListView(ListView):
@@ -13,7 +13,7 @@ class ProductListView(ListView):
     def get_queryset(self):
         return Product.objects.all().prefetch_related('prices__price_type')
 
-class ProductCreateView(AdminRequiredMixin, CreateView):
+class ProductCreateView(AdminOrManagerRequiredMixin, CreateView):
     """Yangi tayyor mahsulot qo'shish"""
     model = Product
     fields = ['name', 'sku', 'image', 'is_active', 'worker_share']
@@ -24,7 +24,7 @@ class ProductCreateView(AdminRequiredMixin, CreateView):
         messages.success(self.request, "Yangi mahsulot yaratildi. Endi unga narx belgilashingiz mumkin.")
         return super().form_valid(form)
 
-class ProductUpdateView(AdminRequiredMixin, UpdateView):
+class ProductUpdateView(AdminOrManagerRequiredMixin, UpdateView):
     """Mahsulot tahrirlash"""
     model = Product
     fields = ['name', 'sku', 'image', 'is_active', 'worker_share']
@@ -35,7 +35,7 @@ class ProductUpdateView(AdminRequiredMixin, UpdateView):
         messages.success(self.request, "Mahsulot ma'lumotlari tahrirlandi.")
         return super().form_valid(form)
 
-class PriceTypeManageView(AdminRequiredMixin, CreateView, ListView):
+class PriceTypeManageView(AdminOrManagerRequiredMixin, CreateView, ListView):
     """Narx turlarini (Do'kon, To'yxona...) yaratish va ro'yxatini ko'rish"""
     model = PriceType
     fields = ['name', 'description']

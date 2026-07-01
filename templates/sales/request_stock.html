@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-xl mx-auto my-10 bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-2xl">
+    <div class="mb-6">
+        <h2 class="text-xl font-black text-white flex items-center gap-2">📥 Ombordan Vitrinaga Non Ajratish</h2>
+        <p class="text-xs text-gray-400 mt-1">Asosiy ombordagi tayyor nonlarni o'zingizning savdo vitrinangizga o'tkazib oling.</p>
+    </div>
+
+    <form method="POST" class="space-y-5">
+        {% csrf_token %}
+        
+        <div>
+            <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Mahsulotni tanlang:</label>
+            <select name="product_id" required class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-sm text-amber-400 font-bold focus:outline-none focus:border-amber-500 cursor-pointer">
+                {% for stock in warehouse_stock %}
+                    <option value="{{ stock.product.id }}">
+                        🍞 {{ stock.product.name }} (Omborda jami: {{ stock.quantity }} ta bor)
+                    </option>
+                {% empty %}
+                    <option disabled>❌ Hozirda asosiy omborda tayyor non qolmagan!</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div>
+            <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Sizga qancha kerak? (Miqdori):</label>
+            <input type="number" name="quantity" min="1" required placeholder="Masalan: 50"
+                   class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-amber-500 font-mono">
+        </div>
+
+        <div class="flex items-center gap-3 pt-2">
+            <a href="{% url 'sales:pos_dashboard' %}" class="w-1/2 text-center bg-gray-950 border border-gray-800 text-gray-400 text-xs font-bold py-3.5 rounded-xl hover:bg-gray-800 transition">
+                Bekor Qilish
+            </a>
+            <button type="submit" class="w-1/2 bg-amber-500 hover:bg-amber-600 text-gray-950 text-xs font-black py-3.5 rounded-xl transition shadow-lg shadow-amber-500/10">
+                📥 Vitrinaga Qo'shish
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

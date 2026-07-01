@@ -24,13 +24,20 @@
                 {% csrf_token %}
                 
                 <div class="space-y-1">
-                    <label class="block text-[11px] font-mono text-gray-400 uppercase">Kategoriya / Toifa:</label>
-                    <select name="category" required class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2.5 text-xs text-gray-300 focus:outline-none focus:border-amber-500">
-                        <option value="">--- Tanlang ---</option>
-                        {% for cat in categories %}
-                            <option value="{{ cat.id }}">{{ cat.name }}</option>
-                        {% endfor %}
-                    </select>
+                    <label class="block text-[11px] font-mono text-gray-400 uppercase">Xodim (Kim uchun/Kimgadir tegishlimi):</label>
+                    {% if request.user.role in 'admin,manager' %}
+                        <select name="staff_member" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2.5 text-xs text-gray-300 focus:outline-none focus:border-amber-500">
+                            <option value="">Hamma uchun / Aloqasiz</option>
+                            {% for user_obj in form.fields.staff_member.queryset %}
+                                <option value="{{ user_obj.id }}">{{ user_obj.full_name }} ({{ user_obj.get_role_display }})</option>
+                            {% endfor %}
+                        </select>
+                    {% else %}
+                        <input type="hidden" name="staff_member" value="{{ request.user.id }}">
+                        <div class="w-full bg-gray-950 border border-gray-800 text-amber-500 rounded-xl px-3 py-2.5 text-xs font-medium">
+                            👤 O'z ehtiyojingiz uchun: {{ request.user.full_name }}
+                        </div>
+                    {% endif %}
                 </div>
 
                 <div class="space-y-1">

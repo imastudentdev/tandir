@@ -1,38 +1,49 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="max-w-md mx-auto min-h-screen text-gray-100 pt-6 select-none">
+<div class="max-w-md mx-auto min-h-screen text-gray-100 pt-6 select-none" x-data="returnForm()">
     <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-xl space-y-5">
         <div class="flex justify-between items-center">
-            <h1 class="text-xl font-black text-white">🔄 Vozvrat qabul qilish</h1>
+            <h1 class="text-xl font-black text-white">🔄 Vozvrat rasmiylashtirish</h1>
             <a href="{% url 'production:vitrina_list' %}" class="text-xs text-amber-400 hover:underline">Orqaga ↩</a>
         </div>
 
-        <form method="POST" action="" class="space-y-4">
+        <form method="POST" action="" @submit="validateSubmit($event)" class="space-y-4">
             {% csrf_token %}
+            
             <div class="space-y-1.5">
-                <label class="block text-[10px] font-mono text-gray-400 uppercase">Sotuvchi (Kim qaytaryapti):</label>
-                <select name="seller" required class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-xs text-white focus:outline-none">
+                <label class="block text-[10px] font-mono text-gray-400 uppercase">Sotuvchi (Vitrina egasi):</label>
+                <select name="seller" x-model="selectedSeller" @change="updateProducts()" required class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-xs text-white focus:outline-none">
+                    {% if request.user.role in 'admin,manager' %}
+                        <option value="">-- Sotuvchini tanlang --</option>
+                    {% endif %}
                     {% for seller in sellers %}
-                    <option value="{{ seller.id }}">👤 {{ seller.get_full_name|default:seller.phone_number }}</option>
+                        <option value="{{ seller.id }}">👤 {{ seller.get_full_name|default:seller.phone_number }}</option>
                     {% endfor %}
                 </select>
             </div>
 
             <div class="space-y-1.5">
-                <label class="block text-[10px] font-mono text-gray-400 uppercase">Qaysi non qaytdi:</label>
-                <select name="product" required class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-xs text-amber-400 font-bold focus:outline-none">
-                    {% for p in products %}
-                    <option value="{{ p.id }}">🍞 {{ p.name }}</option>
+                <label class="block text-[10px] font-mono text-gray-400 uppercase">Qaytarilayotgan non turi:</label>
+                <select name="product" x-model="selectedProduct" @change="updateMaxStock()" required class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-xs text-amber-400 font-bold focus:outline-none">
+                    <option value="">-- Nonni tanlang --</option>
+                    {% for stock in active_stocks %}
+                        <option value="{{ stock.product.id }}" x-show="selectedSeller == '{{ stock.seller.id }}'">
+                            🍞 {{ stock.product.name }} (Vitrinda: {{ stock.quantity }} ta)
+                        </option>
                     {% endfor %}
                 </select>
             </div>
 
             <div class="grid grid-cols-2 gap-3">
                 <div class="space-y-1.5">
-                    <label class="block text-[10px] font-mono text-gray-400 uppercase">Miqdori:</label>
-                    <input type="number" name="quantity" min="1" required class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-3 text-sm font-bold text-white font-mono focus:outline-none">
+                    <div class="flex justify-between items-center">
+                        <label class="block text-[10px] font-mono text-gray-400 uppercase">Miqdori:</label>
+                        <span x-show="maxStock > 0" class="text-[9px] font-mono text-rose-400" x-text="'Maks: ' + maxStock"></span>
+                    </div>
+                    <input type="number" name="quantity" x-model.number="inputQty" min="1" :max="maxStock" required class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-3 text-sm font-bold text-white font-mono focus:outline-none">
                 </div>
+                
                 <div class="space-y-1.5">
                     <label class="block text-[10px] font-mono text-gray-400 uppercase">Sababi:</label>
                     <select name="reason" required class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-xs text-gray-300 focus:outline-none">
@@ -43,10 +54,43 @@
                 </div>
             </div>
 
-            <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-black py-3.5 rounded-xl transition text-xs shadow-lg">
-                Qaytarishni Tasdiqlash 🔄
+            <button type="submit" :disabled="!selectedProduct || inputQty > maxStock || inputQty <= 0" class="w-full bg-red-600 hover:bg-red-700 text-white font-black py-3.5 rounded-xl transition text-xs shadow-lg disabled:opacity-40 disabled:cursor-not-allowed">
+                Vozvratni Yakunlash 🔄
             </button>
         </form>
     </div>
 </div>
+
+<script>
+function returnForm() {
+    return {
+        selectedSeller: '{{ request.user.id }}',
+        selectedProduct: '',
+        inputQty: '',
+        maxStock: 0,
+        stockMap: JSON.parse('{{ vitrina_stock_map_json|escapejs }}'),
+        
+        updateProducts() {
+            this.selectedProduct = '';
+            this.maxStock = 0;
+            this.inputQty = '';
+        },
+        updateMaxStock() {
+            if (this.selectedSeller && this.selectedProduct) {
+                let key = this.selectedSeller + '_' + this.selectedProduct;
+                this.maxStock = this.stockMap[key] ? this.stockMap[key] : 0;
+            } else {
+                this.maxStock = 0;
+            }
+            this.inputQty = '';
+        },
+        validateSubmit(event) {
+            if (this.inputQty > this.maxStock) {
+                event.preventDefault();
+                alert('Xatolik: Vitrinada bu miqdorda tovar mavjud emas!');
+            }
+        }
+    }
+}
+</script>
 {% endblock %}

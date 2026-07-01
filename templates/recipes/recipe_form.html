@@ -2,13 +2,14 @@
 
 {% block content %}
 <div class="min-h-screen text-gray-100 pb-12 select-none" x-data="recipeForm()">
-    
+
     <div class="border-b border-gray-800 pb-4 mb-6">
         <h1 class="text-2xl font-black text-white flex items-center gap-2">
             {% if recipe %}✏️ Retseptni Tahrirlash{% else %}🛠️ Yangi Retsept Tuzish{% endif %}
         </h1>
         <p class="text-xs text-gray-400">
-            {% if recipe %}[{{ recipe.product.name }}] uchun retsept tarkibini o'zgartirish.{% else %}Mahsulot tanlang va unga ketadigan xomashyo sarf normalarini biriktiring.{% endif %}
+            {% if recipe %}[{{ recipe.product.name }}] uchun retsept tarkibini o'zgartirish.{% else %}Mahsulot tanlang
+            va unga ketadigan xomashyo sarf normalarini biriktiring.{% endif %}
         </p>
     </div>
 
@@ -17,77 +18,94 @@
         {{ formset.management_form }}
 
         <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-xl space-y-4">
-            <h2 class="text-sm font-black text-amber-500 uppercase tracking-wider border-b border-gray-800 pb-2 flex items-center gap-2">
+            <h2
+                class="text-sm font-black text-amber-500 uppercase tracking-wider border-b border-gray-800 pb-2 flex items-center gap-2">
                 📦 1. Asosiy Ma'lumotlar
             </h2>
-            
+
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div class="space-y-1 md:col-span-1">
                     <label class="block text-[11px] font-mono text-gray-400 uppercase">Tayyor Mahsulot:</label>
                     {% if recipe %}
-                        <div class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2.5 text-xs text-amber-400 font-bold font-mono">
-                            {{ recipe.product.name }}
-                        </div>
+                    <div
+                        class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2.5 text-xs text-amber-400 font-bold font-mono">
+                        {{ recipe.product.name }}
+                    </div>
                     {% else %}
-                        <select name="product" required class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2.5 text-xs text-gray-300 focus:outline-none focus:border-amber-500">
-                            <option value="">--- Tanlang ---</option>
-                            {% for prod in formset.form.fields.ingredient.queryset %} {% endfor %}
-                            {% include 'recipes/partials/product_select_helper.html' %}
-                        </select>
+                    <select name="product" required
+                        class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2.5 text-xs text-gray-300 focus:outline-none focus:border-amber-500">
+                        <option value="">--- Tanlang ---</option>
+                        {% for prod in products %} <option value="{{ prod.id }}">{{ prod.name }}</option>
+                        {% endfor %}
+                    </select>
                     {% endif %}
+                </div>
+                <div class="md:col-span-3 mt-2">
+                    {% include 'recipes/partials/product_select_helper.html' %}
                 </div>
 
                 <div class="space-y-1 md:col-span-2">
-                    <label class="block text-[11px] font-mono text-gray-400 uppercase">Tayyorlanish usuli / Izoh (Tavsif):</label>
-                    <input type="text" name="description" value="{{ recipe.description|default:'' }}" placeholder="Masalan: Xamir 25 daqiqa tindiriladi, so'ngra 220 darajada yopiladi."
-                           class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2.5 text-xs text-gray-300 focus:outline-none focus:border-amber-500">
+                    <label class="block text-[11px] font-mono text-gray-400 uppercase">Tayyorlanish usuli / Izoh
+                        (Tavsif):</label>
+                    <input type="text" name="description" value="{{ recipe.description|default:'' }}"
+                        placeholder="Masalan: Xamir 25 daqiqa tindiriladi, so'ngra 220 darajada yopiladi."
+                        class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2.5 text-xs text-gray-300 focus:outline-none focus:border-amber-500">
                 </div>
             </div>
         </div>
 
         <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-xl space-y-4">
-            <h2 class="text-sm font-black text-emerald-400 uppercase tracking-wider border-b border-gray-800 pb-2 flex items-center justify-between">
+            <h2
+                class="text-sm font-black text-emerald-400 uppercase tracking-wider border-b border-gray-800 pb-2 flex items-center justify-between">
                 <span>🌾 2. Tarkibiy qismlar (1 dona mahsulot uchun norma)</span>
             </h2>
 
             <div class="space-y-3">
                 {% for form in formset %}
-                    <div class="grid grid-cols-12 gap-3 items-center bg-gray-950/60 p-3 rounded-xl border border-gray-800/60 transition hover:border-gray-700">
-                        {{ form.id }}
-                        
-                        <div class="col-span-6 space-y-1">
-                            <label class="block text-[10px] font-mono text-gray-500 uppercase">Xomashyo:</label>
-                            <select name="{{ form.ingredient.html_name }}" class="w-full bg-gray-900 border border-gray-800 rounded-lg px-2.5 py-2 text-xs text-gray-300 focus:outline-none focus:border-emerald-500">
-                                {% for choice in form.ingredient.field.choices %}
-                                    <option value="{{ choice.0 }}" {% if choice.0 == form.ingredient.value %}selected{% endif %}>{{ choice.1 }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
+                <div
+                    class="grid grid-cols-12 gap-3 items-center bg-gray-950/60 p-3 rounded-xl border border-gray-800/60 transition hover:border-gray-700">
+                    {{ form.id }}
 
-                        <div class="col-span-4 space-y-1">
-                            <label class="block text-[10px] font-mono text-gray-500 uppercase">Sarf Miqdori:</label>
-                            <input type="number" step="0.0001" name="{{ form.quantity.html_name }}" value="{{ form.quantity.value|default:'' }}" placeholder="Masalan: 0.3500"
-                                   class="w-full bg-gray-900 border border-gray-800 rounded-lg px-2.5 py-2 text-xs font-mono font-bold text-emerald-400 focus:outline-none focus:border-emerald-500">
-                        </div>
-
-                        <div class="col-span-2 text-center pt-4">
-                            {% if formset.can_delete and form.instance.pk %}
-                                <label class="inline-flex items-center gap-1.5 cursor-pointer text-red-400 hover:text-red-500 text-xs">
-                                    <input type="checkbox" name="{{ form.DELETE.html_name }}" class="rounded bg-gray-900 border-gray-800 text-red-600 focus:ring-0">
-                                    ❌ Ochirish
-                                </label>
-                            {% endif %}
-                        </div>
+                    <div class="col-span-6 space-y-1">
+                        <label class="block text-[10px] font-mono text-gray-500 uppercase">Xomashyo:</label>
+                        <select name="{{ form.ingredient.html_name }}"
+                            class="w-full bg-gray-900 border border-gray-800 rounded-lg px-2.5 py-2 text-xs text-gray-300 focus:outline-none focus:border-emerald-500">
+                            {% for choice in form.ingredient.field.choices %}
+                            <option value="{{ choice.0 }}" {% if choice.0==form.ingredient.value %}selected{% endif %}>
+                                {{ choice.1 }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
+
+                    <div class="col-span-4 space-y-1">
+                        <label class="block text-[10px] font-mono text-gray-500 uppercase">Sarf Miqdori:</label>
+                        <input type="number" step="0.0001" name="{{ form.quantity.html_name }}"
+                            value="{{ form.quantity.value|default:'' }}" placeholder="Masalan: 0.3500"
+                            class="w-full bg-gray-900 border border-gray-800 rounded-lg px-2.5 py-2 text-xs font-mono font-bold text-emerald-400 focus:outline-none focus:border-emerald-500">
+                    </div>
+
+                    <div class="col-span-2 text-center pt-4">
+                        {% if formset.can_delete and form.instance.pk %}
+                        <label
+                            class="inline-flex items-center gap-1.5 cursor-pointer text-red-400 hover:text-red-500 text-xs">
+                            <input type="checkbox" name="{{ form.DELETE.html_name }}"
+                                class="rounded bg-gray-900 border-gray-800 text-red-600 focus:ring-0">
+                            ❌ Ochirish
+                        </label>
+                        {% endif %}
+                    </div>
+                </div>
                 {% endfor %}
             </div>
         </div>
 
         <div class="flex items-center gap-3">
-            <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-gray-950 font-black px-6 py-3 rounded-xl text-xs uppercase tracking-wider transition">
+            <button type="submit"
+                class="bg-amber-500 hover:bg-amber-600 text-gray-950 font-black px-6 py-3 rounded-xl text-xs uppercase tracking-wider transition">
                 💾 Retseptni Saqlash
             </button>
-            <a href="{% url 'recipes:recipe_list' %}" class="bg-gray-900 border border-gray-800 text-gray-400 hover:text-white px-6 py-3 rounded-xl text-xs uppercase tracking-wider transition">
+            <a href="{% url 'recipes:recipe_list' %}"
+                class="bg-gray-900 border border-gray-800 text-gray-400 hover:text-white px-6 py-3 rounded-xl text-xs uppercase tracking-wider transition">
                 Bekor qilish
             </a>
         </div>

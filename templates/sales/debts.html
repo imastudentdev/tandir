@@ -2,17 +2,19 @@
 
 {% block content %}
 <div class="min-h-screen text-gray-100 pb-12 select-none" x-data="{ payModal: false, activeDebt: {} }">
-    
+
     <div class="border-b border-gray-800 pb-4 mb-6">
         <h1 class="text-2xl font-black text-white flex items-center gap-2">📕 Nasiya & Qarzdorlik Jurnali</h1>
-        <p class="text-xs text-gray-400">Xaridorlar tomonidan olingan nonlar va ularning qisman to'lovlarini nazorat qilish.</p>
+        <p class="text-xs text-gray-400">Xaridorlar tomonidan olingan nonlar va ularning qisman to'lovlarini nazorat
+            qilish.</p>
     </div>
 
     <div class="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden shadow-xl">
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="bg-gray-950 border-b border-gray-800 text-[10px] font-mono text-gray-400 uppercase tracking-wider">
+                    <tr
+                        class="bg-gray-950 border-b border-gray-800 text-[10px] font-mono text-gray-400 uppercase tracking-wider">
                         <th class="p-4">ID/Sana</th>
                         <th class="p-4">Qarzdor Ismi & Tel</th>
                         <th class="p-4 text-right">Umumiy Qarz</th>
@@ -22,7 +24,9 @@
                 <tbody class="divide-y divide-gray-800/60 text-xs">
                     {% for debt in debts %}
                     <tr class="hover:bg-gray-950/40 transition">
-                        <td class="p-4 font-mono text-gray-500">#{{ debt.id }}<p class="text-[10px] mt-0.5">{{ debt.created_at|date:"d.m.Y" }}</p></td>
+                        <td class="p-4 font-mono text-gray-500">#{{ debt.id }}<p class="text-[10px] mt-0.5">{{
+                                debt.created_at|date:"d.m.Y" }}</p>
+                        </td>
                         <td class="p-4">
                             <span class="font-bold text-white">{{ debt.customer_name }}</span>
                             <p class="text-[10px] font-mono text-gray-500 mt-0.5">{{ debt.customer_phone }}</p>
@@ -31,15 +35,17 @@
                             {{ debt.total_amount|floatformat:0 }} UZS
                         </td>
                         <td class="p-4 text-center">
-                            <button @click="activeDebt = { id: '{{ debt.id }}', name: '{{ debt.customer_name }}', total: '{{ debt.total_amount }}' }; payModal = true"
-                                    class="bg-emerald-950 text-emerald-400 border border-emerald-900/60 text-[11px] font-bold px-3 py-1.5 rounded-lg transition hover:bg-emerald-900 hover:text-white">
+                            <button
+                                @click="activeDebt = { id: '{{ debt.id }}', name: '{{ debt.customer_name }}', total: '{{ debt.remaining_debt|default:debt.total_amount }}' }; payModal = true"
+                                class="bg-emerald-950 text-emerald-400 border border-emerald-900/60 text-[11px] font-bold px-3 py-1.5 rounded-lg transition hover:bg-emerald-900 hover:text-white">
                                 💰 Pul Olish
                             </button>
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="4" class="p-12 text-center text-gray-500 font-medium">🎉 Hozirda faol nasiyalar (qarzlar) mavjud emas!</td>
+                        <td colspan="4" class="p-12 text-center text-gray-500 font-medium">🎉 Hozirda faol nasiyalar
+                            (qarzlar) mavjud emas!</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -49,24 +55,30 @@
 
     <div x-show="payModal" class="fixed inset-0 z-50 flex items-center justify-center p-4" style="display: none;">
         <div class="absolute inset-0 bg-gray-950/80 backdrop-blur-sm" @click="payModal = false"></div>
-        
+
         <form :action="'/sales/debts/pay/' + activeDebt.id + '/'" method="POST"
-              class="bg-gray-900 border border-gray-800 rounded-2xl max-w-sm w-full p-6 shadow-2xl relative space-y-4" x-transition>
+            class="bg-gray-900 border border-gray-800 rounded-2xl max-w-sm w-full p-6 shadow-2xl relative space-y-4"
+            x-transition>
             {% csrf_token %}
             <div class="border-b border-gray-800 pb-2">
                 <h3 class="text-sm font-black text-white" x-text="activeDebt.name + ' - qarzini yopish'"></h3>
-                <p class="text-[10px] text-gray-500 font-mono">Umumiy balans: <span class="text-red-400 font-bold" x-text="activeDebt.total + ' so\'m'"></span></p>
+                <p class="text-[10px] text-gray-500 font-mono">Umumiy balans: <span class="text-red-400 font-bold"
+                        x-text="activeDebt.total + ' so\'m'"></span></p>
             </div>
 
             <div class="space-y-1">
                 <label class="block text-[10px] font-mono text-gray-400 uppercase">Olingan pul miqdori (UZS):</label>
                 <input type="number" name="amount" required min="1" :max="activeDebt.total" placeholder="Masalan: 50000"
-                       class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-3 text-sm font-bold text-emerald-400 focus:outline-none focus:border-emerald-500 font-mono">
+                    class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-3 text-sm font-bold text-emerald-400 focus:outline-none focus:border-emerald-500 font-mono">
             </div>
 
             <div class="grid grid-cols-2 gap-2">
-                <button type="button" @click="payModal = false" class="bg-gray-900 text-gray-400 py-2.5 rounded-xl text-xs font-bold border border-gray-800">Bekor qilish</button>
-                <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-gray-950 font-black py-2.5 rounded-xl text-xs transition">Kirim qilish 💵</button>
+                <button type="button" @click="payModal = false"
+                    class="bg-gray-900 text-gray-400 py-2.5 rounded-xl text-xs font-bold border border-gray-800">Bekor
+                    qilish</button>
+                <button type="submit"
+                    class="bg-emerald-600 hover:bg-emerald-700 text-gray-950 font-black py-2.5 rounded-xl text-xs transition">Kirim
+                    qilish 💵</button>
             </div>
         </form>
     </div>

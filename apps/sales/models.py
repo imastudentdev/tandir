@@ -22,7 +22,6 @@ class Sale(models.Model):
     total_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, verbose_name="Umumiy hisob")
     payment_type = models.CharField(max_length=10, choices=PAYMENT_CHOICES, default='cash', verbose_name="To'lov turi")
     
-    # 📌 QARZLARNI BOSHQARISH UCHUN YANGI MAYDONLAR:
     remaining_debt = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, verbose_name="Qolgan qarz summasi")
     debt_status = models.CharField(max_length=10, choices=DEBT_STATUS_CHOICES, default='paid', verbose_name="Qarz holati")
     
@@ -34,7 +33,6 @@ class Sale(models.Model):
         verbose_name_plural = "Sotuvlar"
 
     def save(self, *args, **kwargs):
-        # Agar birinchi marta qarzga sotilayotgan bo'lsa, qolgan qarz umumiy summaga teng bo'ladi
         if not self.pk and self.payment_type == 'debt':
             self.remaining_debt = self.total_amount
             self.debt_status = 'unpaid'
@@ -67,7 +65,6 @@ class SaleItem(models.Model):
     subtotal = models.DecimalField(max_digits=12, decimal_places=2, verbose_name="Oraliq summa")
 
 
-# 📌 YANGI MODEL: Qarz to'lovlari tarixi (Sotuvchi qancha pul olganini bilish uchun)
 class DebtPayment(models.Model):
     sale = models.ForeignKey(Sale, on_delete=models.CASCADE, related_name='debt_payments', verbose_name="Qaysi qarz uchun")
     collected_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, verbose_name="Pulni yig'gan xodim")
